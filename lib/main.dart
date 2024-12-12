@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'login_page.dart'; // Ensure this import points to the correct file
+import 'role_selection_page.dart'; // Import the role selection page
 
 void main() {
   runApp(const MyApp());
@@ -117,9 +118,7 @@ class SecondPage extends StatelessWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  const LoginPage()), // Corrected here
+                          MaterialPageRoute(builder: (context) => const LoginPage()),
                         );
                       },
                       style: ElevatedButton.styleFrom(
@@ -148,7 +147,13 @@ class SecondPage extends StatelessWidget {
                   SizedBox(
                     width: 180,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const RoleSelectionPage()),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         padding: const EdgeInsets.symmetric(
