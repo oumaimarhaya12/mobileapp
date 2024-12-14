@@ -9,6 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  image_picker: ^0.8.5+3  # Add the latest version
 
 dev_dependencies:
   flutter_test:
@@ -23,3 +24,14 @@ flutter:
     - assets/email.png
     - assets/motdepasse.png
     - assets/back.png
+    - assets/logoo.png
+    - assets/menu.png
+    - assets/search.png
+    - assets/pharmacypic.png
+    - assets/commande.png
+    - assets/pharmacie.png
+    - assets/accueil.png
+    - assets/searchwhite.png
+    - assets/upload.png
+    - assets/commandewhite.png
+    - assets/pharmaciewhite.png

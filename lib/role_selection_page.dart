@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'login_page.dart';
 import 'create_account.dart'; // Import the create_account page
+import 'create_account_pharmacien.dart'; // Import the create_account_pharmacien page
 
 class RoleSelectionPage extends StatelessWidget {
   const RoleSelectionPage({Key? key}) : super(key: key);
@@ -31,7 +32,7 @@ class RoleSelectionPage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.green,
+                      color: Color(0xFF24C866), // Updated color
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -40,10 +41,11 @@ class RoleSelectionPage extends StatelessWidget {
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          // Logic for "Pharmacien" (You can define the navigation later)
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Pharmacien option not implemented yet."),
+                          // Navigate to CreateAccountPharmacienPage when "Pharmacien" is selected
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CreateAccountPharmacien(), // Navigate to the CreateAccountPharmacien page
                             ),
                           );
                         },
@@ -51,14 +53,14 @@ class RoleSelectionPage extends StatelessWidget {
                           backgroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 40, vertical: 15),
-                          side: const BorderSide(color: Colors.green),
+                          side: const BorderSide(color: Color(0xFF24C866)), // Updated color
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
                         child: const Text(
                           'Pharmacien',
-                          style: TextStyle(color: Colors.green),
+                          style: TextStyle(color: Color(0xFF24C866)), // Updated color
                         ),
                       ),
                       ElevatedButton(
@@ -67,12 +69,12 @@ class RoleSelectionPage extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const CreateAccountPage(),
+                              builder: (context) => CreateAccount(),
                             ),
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
+                          backgroundColor: Color(0xFF24C866), // Updated color
                           padding: const EdgeInsets.symmetric(
                               horizontal: 60, vertical: 15),
                           shape: RoundedRectangleBorder(

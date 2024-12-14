@@ -1,8 +1,49 @@
 import 'package:flutter/material.dart';
+import 'home_patient.dart';
+import 'home_pharmacien.dart'; 
+import 'role_selection_page.dart'; // Import the RoleSelectionPage
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
 
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  final Map<String, Map<String, String>> _users = {
+  'oumaima': {'password': '123', 'role': 'patient'},
+  'ismail': {'password': '123', 'role': 'pharmacien'},
+};
+void _login() {
+  final email = _emailController.text;
+  final password = _passwordController.text;
+
+  if (email == 'oumaima' && password == '123') {
+    // Navigate to the HomePatient page if the user is "oumaima"
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const HomePatientPage()),
+    );
+  } else if (email == 'ismail' && password == '123') {
+    // Navigate to the HomePharmacien page if the user is "ismail"
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) =>  PharmacistHomePage()),
+    );
+  } else {
+    // Show an error message if credentials are incorrect
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Email ou mot de passe incorrect'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,18 +77,23 @@ class LoginPage extends StatelessWidget {
             ),
             const SizedBox(height: 40),
             _buildTextField(
+              controller: _emailController,
               label: 'Email ou numéro de téléphone',
               iconPath: 'assets/email.png',
               obscureText: false,
             ),
             const SizedBox(height: 20),
             _buildTextField(
+              controller: _passwordController,
               label: 'Mot de passe',
               iconPath: 'assets/motdepasse.png',
               obscureText: true,
             ),
             const SizedBox(height: 30),
-            _buildLoginButton(),
+            GestureDetector(
+              onTap: _login,
+              child: _buildLoginButton(),
+            ),
             const SizedBox(height: 20),
             _buildNoAccountText(context),
           ],
@@ -57,6 +103,7 @@ class LoginPage extends StatelessWidget {
   }
 
   Widget _buildTextField({
+    required TextEditingController controller,
     required String label,
     required String iconPath,
     required bool obscureText,
@@ -69,19 +116,19 @@ class LoginPage extends StatelessWidget {
         color: Colors.transparent,
       ),
       child: TextField(
+        controller: controller,
         obscureText: obscureText,
         style: const TextStyle(
-          fontSize: 14, // Make text smaller
-          color: Color(0x40000000), // Light gray text
+          fontSize: 14,
+          color: Color(0x40000000),
         ),
         decoration: InputDecoration(
           labelText: label,
-          prefixIcon:
-              Image.asset(iconPath, width: 20, height: 20), // Smaller icon
+          prefixIcon: Image.asset(iconPath, width: 20, height: 20),
           labelStyle: const TextStyle(
-            color: Color(0xFF4A4A4A), // Dark gray color for labels
+            color: Color(0xFF4A4A4A),
             fontFamily: 'Poppins',
-            fontSize: 14, // Make label text smaller
+            fontSize: 14,
           ),
           border: InputBorder.none,
         ),
@@ -91,7 +138,7 @@ class LoginPage extends StatelessWidget {
 
   Widget _buildLoginButton() {
     return Container(
-      width: 200, // Reduced width
+      width: 200,
       padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
         color: const Color(0xFF24C866),
@@ -120,7 +167,10 @@ class LoginPage extends StatelessWidget {
   Widget _buildNoAccountText(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Navigate to sign-up page (not implemented here)
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const RoleSelectionPage()),
+        );
       },
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.center,

@@ -9,19 +9,20 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: CreateAccount(),
+      home: CreateAccountPharmacien(),
     );
   }
 }
 
-class CreateAccount extends StatefulWidget {
+class CreateAccountPharmacien extends StatefulWidget {
   @override
   _CreateAccountState createState() => _CreateAccountState();
 }
 
-class _CreateAccountState extends State<CreateAccount> {
+class _CreateAccountState extends State<CreateAccountPharmacien> {
   // Controllers for each input field to handle user input
   final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _pharmacyNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
@@ -31,6 +32,7 @@ class _CreateAccountState extends State<CreateAccount> {
   void dispose() {
     // Dispose controllers when no longer needed to avoid memory leaks
     _fullNameController.dispose();
+    _pharmacyNameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
     _addressController.dispose();
@@ -87,6 +89,7 @@ class _CreateAccountState extends State<CreateAccount> {
 
                     // Input Fields
                     _buildInputField("Nom complet", _fullNameController),
+                    _buildInputField("Nom de pharmacie", _pharmacyNameController), // Added field for pharmacy name
                     _buildInputField("Adresse email", _emailController),
                     _buildInputField("Numéro de téléphone", _phoneController),
                     _buildInputField("Adresse", _addressController),
