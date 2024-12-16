@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'admin.dart';
 import 'login_page.dart';
-import 'role_selection_page.dart'; // Ensure this import points to the correct file
-// Import the role selection page
+import 'role_selection_page.dart'; // Assurez-vous que l'import pointe vers le bon fichier
 
 void main() {
   runApp(const MyApp());
@@ -26,8 +26,7 @@ class FirstPage extends StatefulWidget {
   FirstPageState createState() => FirstPageState();
 }
 
-class FirstPageState extends State<FirstPage>
-    with SingleTickerProviderStateMixin {
+class FirstPageState extends State<FirstPage> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _opacityAnimation;
 
@@ -172,6 +171,42 @@ class SecondPage extends StatelessWidget {
                         'Créer un compte',
                         style: TextStyle(
                           color: Color(0xFF24C866),
+                          fontFamily: 'Poppins',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 40),
+              Column(
+                children: [
+                  SizedBox(
+                    width: 180,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const AdminHomePage() ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF24C866),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 20,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(33),
+                        ),
+                        shadowColor: const Color(0x40000000),
+                      ),
+                      child: const Text(
+                        'Administrateur',
+                        style: TextStyle(
+                          color: Colors.white,
                           fontFamily: 'Poppins',
                           fontSize: 16,
                           fontWeight: FontWeight.w600,

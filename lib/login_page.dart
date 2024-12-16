@@ -1,49 +1,144 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:jwt_decoder/jwt_decoder.dart';
+import 'dart:convert'; // Pour gérer JSON
+import 'admin.dart';
 import 'home_patient.dart';
-import 'home_pharmacien.dart'; 
-import 'role_selection_page.dart'; // Import the RoleSelectionPage
+import 'home_pharmacien.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  _LoginPageState createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
-  final Map<String, Map<String, String>> _users = {
-  'oumaima': {'password': '123', 'role': 'patient'},
-  'ismail': {'password': '123', 'role': 'pharmacien'},
-};
-void _login() {
-  final email = _emailController.text;
-  final password = _passwordController.text;
+  bool isLoading = false;
+  String? errorMessage; // Message d'erreur
+  String? successMessage; // Message de succès
 
-  if (email == 'oumaima' && password == '123') {
-    // Navigate to the HomePatient page if the user is "oumaima"
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const HomePatientPage()),
-    );
-  } else if (email == 'ismail' && password == '123') {
-    // Navigate to the HomePharmacien page if the user is "ismail"
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) =>  PharmacistHomePage()),
-    );
-  } else {
-    // Show an error message if credentials are incorrect
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Email ou mot de passe incorrect'),
-        backgroundColor: Colors.red,
-      ),
-    );
+  // Fonction pour gérer le login
+  Future<void> handleLogin() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+      successMessage = null;
+    });
+
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      setState(() {
+        isLoading = false;
+        errorMessage = "Veuillez remplir tous les champs.";
+      });
+      return;
+    }
+
+    try {
+      // Remplacez par votre URL API
+      const apiUrl = 'http://10.0.2.2:8080/demo-1.0-SNAPSHOT/api/auth/login';
+
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'password': password}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body); // Décoder la réponse JSON
+        print("Réponse complète : $data");
+
+        if (data['message'] == "Login successful" && data['data'] != null) {
+          // Connexion réussie
+          final token = data['data']; // Le token JWT
+          // print("Token JWT : $token");
+
+          // Enregistrer le token dans les SharedPreferences
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('jwt_token', token);
+
+          // Naviguer vers la page appropriée
+          navigateBasedOnRole(token);
+        } else {
+          setState(() {
+            errorMessage = "Réponse inattendue de l'API.";
+          });
+        }
+      } else {
+        setState(() {
+          errorMessage = "Erreur ${response.statusCode} : ${response.reasonPhrase}";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = "Erreur de connexion : $e";
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
-}
+
+  // Fonction pour naviguer en fonction du rôle de l'utilisateur
+  Future<void> navigateBasedOnRole(String token) async {
+    try {
+      // Décoder le token
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+      print("Les données de notre token : $decodedToken");
+      // 🔥 Vérifiez le champ correct ici (username, sub, name)
+      String extractedUsername = decodedToken['sub'] ?? decodedToken['sub'] ?? decodedToken['name'] ?? 'Utilisateur';
+
+      // ➡️ Stocker dans l'état de la page
+      setState(() {
+        var username = extractedUsername;
+      });
+
+      // ✅ Stocker dans SharedPreferences pour l'utiliser dans d'autres pages
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('username', extractedUsername);
+      print("le Nom  l'utilisateur : $extractedUsername");
+
+      String role = decodedToken['role'] ?? 'user';
+      print("Rôle de l'utilisateur : $role");
+
+      Widget page;
+      if (role == 'ADMIN') {
+        page = const AdminHomePage();
+      } else if (role == 'PATIENT') {
+        page = const HomePatientPage();
+      } else if (role == 'PHARMACY') {
+        page = const PharmacistHomePage();
+      } else {
+        setState(() {
+          errorMessage = "Rôle inconnu. Impossible de naviguer.";
+        });
+        return;
+      }
+
+      setState(() {
+        successMessage = "Connexion réussie. Bienvenue !";
+      });
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => page),
+      );
+    } catch (error) {
+      setState(() {
+        errorMessage = "Erreur lors de la décodification du token : $error";
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,7 +147,6 @@ void _login() {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
               width: 150,
@@ -64,38 +158,47 @@ void _login() {
                 ),
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
             const Text(
-              'Entrez vos informations pour continuer',
-              textAlign: TextAlign.center,
+              'Connexion à votre compte',
               style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
                 color: Color(0xFF24C866),
-                fontFamily: 'Poppins',
-                fontSize: 25,
-                fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 30),
             _buildTextField(
-              controller: _emailController,
-              label: 'Email ou numéro de téléphone',
+              label: 'Email',
               iconPath: 'assets/email.png',
               obscureText: false,
+              controller: emailController,
             ),
             const SizedBox(height: 20),
             _buildTextField(
-              controller: _passwordController,
               label: 'Mot de passe',
               iconPath: 'assets/motdepasse.png',
               obscureText: true,
-            ),
-            const SizedBox(height: 30),
-            GestureDetector(
-              onTap: _login,
-              child: _buildLoginButton(),
+              controller: passwordController,
             ),
             const SizedBox(height: 20),
-            _buildNoAccountText(context),
+            if (errorMessage != null)
+              Text(
+                errorMessage!,
+                style: const TextStyle(color: Colors.red),
+              ),
+            if (successMessage != null)
+              Text(
+                successMessage!,
+                style: const TextStyle(color: Colors.green),
+              ),
+            const SizedBox(height: 20),
+            isLoading
+                ? const CircularProgressIndicator()
+                : GestureDetector(
+              onTap: handleLogin,
+              child: _buildLoginButton(),
+            ),
           ],
         ),
       ),
@@ -103,33 +206,23 @@ void _login() {
   }
 
   Widget _buildTextField({
-    required TextEditingController controller,
     required String label,
     required String iconPath,
     required bool obscureText,
+    required TextEditingController controller,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
+        border: Border.all(color: Colors.black),
         borderRadius: BorderRadius.circular(33),
-        border: Border.all(color: const Color.fromRGBO(0, 0, 0, 1), width: 2),
-        color: Colors.transparent,
       ),
       child: TextField(
         controller: controller,
         obscureText: obscureText,
-        style: const TextStyle(
-          fontSize: 14,
-          color: Color(0x40000000),
-        ),
         decoration: InputDecoration(
+          icon: Image.asset(iconPath, width: 20, height: 20),
           labelText: label,
-          prefixIcon: Image.asset(iconPath, width: 20, height: 20),
-          labelStyle: const TextStyle(
-            color: Color(0xFF4A4A4A),
-            fontFamily: 'Poppins',
-            fontSize: 14,
-          ),
           border: InputBorder.none,
         ),
       ),
@@ -138,62 +231,17 @@ void _login() {
 
   Widget _buildLoginButton() {
     return Container(
-      width: 200,
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 14),
       decoration: BoxDecoration(
         color: const Color(0xFF24C866),
         borderRadius: BorderRadius.circular(33),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x40000000),
-            blurRadius: 4,
-            offset: Offset(0, 4),
-          ),
-        ],
       ),
-      child: const Text(
-        'Se connecter',
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: Colors.white,
-          fontFamily: 'Poppins',
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
+      child: const Center(
+        child: Text(
+          'Se connecter',
+          style: TextStyle(color: Colors.white, fontSize: 18),
         ),
-      ),
-    );
-  }
-
-  Widget _buildNoAccountText(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const RoleSelectionPage()),
-        );
-      },
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            "Vous n'avez pas de compte ? ",
-            style: TextStyle(
-              color: Colors.black,
-              fontFamily: 'Poppins',
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          Text(
-            'Créer un compte',
-            style: TextStyle(
-              color: Color(0xFF24C866),
-              fontFamily: 'Poppins',
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
       ),
     );
   }

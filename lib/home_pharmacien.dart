@@ -1,15 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'login_page.dart';
 import 'ordonnance_details.dart';
 
 class PharmacistHomePage extends StatefulWidget {
+  const PharmacistHomePage({super.key});
+
   @override
   _PharmacistHomePageState createState() => _PharmacistHomePageState();
 }
 
 class _PharmacistHomePageState extends State<PharmacistHomePage> {
   bool isOrdonnancesSelected = true; // Default selection
+  String username = '';
 
+  @override
+  void initState() {
+    super.initState();
+    loadUsername();
+  }
+
+  // ✅ Charger le nom d'utilisateur à partir de SharedPreferences
+  Future<void> loadUsername() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedUsername = prefs.getString('username');
+
+    setState(() {
+      username = savedUsername ?? 'Utilisateur';
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -202,9 +221,9 @@ class _PharmacistHomePageState extends State<PharmacistHomePage> {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children:  [
                 Text(
-                  'Bonjour Ismail',
+                  'Bonjour $username',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 22,
@@ -266,8 +285,8 @@ class _PharmacistHomePageState extends State<PharmacistHomePage> {
 
   Widget _actionButton(
       {required String label,
-      required bool isSelected,
-      required VoidCallback onTap}) {
+        required bool isSelected,
+        required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -292,76 +311,76 @@ class _PharmacistHomePageState extends State<PharmacistHomePage> {
     );
   }
 
- Widget _orderBoxes() {
-  return Column(
-    children: List.generate(3, (index) {
-      return Container(
-        margin: const EdgeInsets.symmetric(vertical: 10),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(5),
-          border: Border.all(color: const Color.fromRGBO(45, 45, 72, 0.2)),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 4,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Commande #000${index + 1}',
-              style: const TextStyle(
-                color: Color(0xFF24C866),
-                fontFamily: 'Poppins',
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+  Widget _orderBoxes() {
+    return Column(
+      children: List.generate(3, (index) {
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(5),
+            border: Border.all(color: const Color.fromRGBO(45, 45, 72, 0.2)),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 4,
+                offset: Offset(0, 4),
               ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Patient: Oumaima Rhaya\nDate et heure: 12/12/2024 - 20:14',
-              style: TextStyle(
-                color: Colors.black,
-                fontFamily: 'Poppins',
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Commande #000${index + 1}',
+                style: const TextStyle(
+                  color: Color(0xFF24C866),
+                  fontFamily: 'Poppins',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerRight,
-              child: GestureDetector(
-                onTap: () {
-                  // Navigate to OrdonnanceDetailsPage
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => OrdonnanceDetailsPage(),
+              const SizedBox(height: 8),
+              const Text(
+                'Patient: Oumaima Rhaya\nDate et heure: 12/12/2024 - 20:14',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: GestureDetector(
+                  onTap: () {
+                    // Navigate to OrdonnanceDetailsPage
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => OrdonnanceDetailsPage(),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'Voir les détails',
+                    style: TextStyle(
+                      color: Color(0xFF24C866),
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
-                  );
-                },
-                child: const Text(
-                  'Voir les détails',
-                  style: TextStyle(
-                    color: Color(0xFF24C866),
-                    fontFamily: 'Poppins',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-      );
-    }),
-  );
-}
+            ],
+          ),
+        );
+      }),
+    );
+  }
   Widget _historyBoxes() {
     return Column(
       children: List.generate(3, (index) {
